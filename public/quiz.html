@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Competition — Test in progress</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <h1>Quiz Competition</h1>
+    <span class="tag">Answer sheet in progress</span>
+  </div>
+
+  <div id="errorBox" class="error-box"></div>
+
+  <div id="loadingMsg" style="font-family: var(--font-mono); color: var(--utility-olive);">
+    Loading questions...
+  </div>
+
+  <div class="sheet" id="quizSheet" style="display:none;">
+    <div class="sheet-body">
+
+      <div class="quiz-top">
+        <span class="q-counter" id="qCounter">Question 1 of 20</span>
+        <div class="timer-ring" id="timerRing">
+          <svg viewBox="0 0 56 56">
+            <circle class="track" cx="28" cy="28" r="24"></circle>
+            <circle class="progress" id="timerCircle" cx="28" cy="28" r="24"></circle>
+          </svg>
+          <div class="num" id="timerNum">30</div>
+        </div>
+      </div>
+
+      <div class="progress-row" id="progressRow"></div>
+
+      <div class="question-block" id="questionBlock">
+        <div class="stamp-flash" id="stampFlash">TIME UP</div>
+        <div class="q-number" id="qNumber">Question 01</div>
+        <p class="q-text" id="qText">Loading...</p>
+        <div class="options" id="optionsList"></div>
+      </div>
+
+      <div class="quiz-footer">
+        <button class="btn btn-secondary" id="prevBtn" type="button" style="visibility:hidden;">← Previous</button>
+        <button class="btn" id="nextBtn" type="button">Next →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/js/quiz.js"></script>
+</body>
+</html>

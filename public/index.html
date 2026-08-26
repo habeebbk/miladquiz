@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Competition — Registration</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="masthead">
+      <h1>Quiz Competition</h1>
+      <span class="tag">OMR Answer Sheet · 20 Q · 20s each</span>
+    </div>
+
+    <div class="sheet">
+      <div class="sheet-body">
+        <p style="font-size:0.95rem; color:red; margin-top:0;">
+          <b>
+            പരീക്ഷ ആരംഭിക്കുന്നതിന് മുമ്പ് നിങ്ങളുടെ വിശദാംശങ്ങൾ പൂരിപ്പിക്കുക. ഓരോ ചോദ്യത്തിനും 20 സെക്കൻഡ് സമയം
+            മാത്രമാണ്. പരീക്ഷ pause ചെയ്യാനോ വീണ്ടും എഴുതാനോ കഴിയില്ല. ഒരു ഫോൺ നമ്പർ ഉപയോഗിച്ച് ഒരിക്കൽ മാത്രമേ പരീക്ഷ
+            എഴുതാൻ കഴിയൂ.
+          </b>
+          <br>
+          <b>
+            Fill in your details before starting. You have 20 seconds for each question. The test cannot be paused or
+            retaken. Each phone number can be used only once.
+          </b>
+        </p>
+
+        <div id="errorBox" class="error-box"></div>
+
+        <form id="registerForm">
+          <div class="field">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required autocomplete="name" placeholder="Enter your full name">
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone Number (10 digits) ഫോൺ നമ്പർ ശരിയാണോ എന്ന് ഉറപ്പ് വരുത്തണം</label>
+            <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" maxlength="10" inputmode="numeric"
+              autocomplete="tel" placeholder="e.g. 9876543210">
+          </div>
+
+          <div class="field">
+            <label for="place">Place</label>
+            <input type="text" id="place" name="place" required placeholder="Enter your city / place">
+          </div>
+
+          <button type="submit" class="btn btn-block" id="startBtn">Start Test</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/register.js"></script>
+</body>
+
+</html>

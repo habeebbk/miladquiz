@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — Quiz Competition</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrap">
+  <div class="admin-bar">
+    <h1>Results Register</h1>
+    <div>
+      <span class="tag" style="font-family:var(--font-mono); font-size:0.8rem; color:var(--utility-olive); margin-right:1rem;" id="adminUserTag"></span>
+      <button class="btn" id="logoutBtn" style="padding:0.5rem 1rem;">Log Out</button>
+    </div>
+  </div>
+
+  <div id="errorBox" class="error-box"></div>
+
+  <!-- List view -->
+  <div id="listView">
+    <table class="register" id="resultsTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Place</th>
+          <th>Score</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+    <p id="emptyMsg" style="display:none; font-family:var(--font-mono); color:var(--utility-olive);">
+      No submissions yet.
+    </p>
+  </div>
+
+  <!-- Detail view -->
+  <div id="detailView" style="display:none;">
+    <a class="link-back" id="backLink">&larr; Back to results</a>
+    <div class="sheet" style="margin-top:1rem;">
+      <div class="sheet-body">
+        <h2 id="detailName" style="font-family:var(--font-stamp); margin-top:0;"></h2>
+        <p id="detailMeta" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--utility-olive);"></p>
+        <p>
+          Score: <span class="score-tag" id="detailScore"></span>
+        </p>
+        <div id="detailAnswers"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
