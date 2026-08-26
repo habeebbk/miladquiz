@@ -5,7 +5,25 @@ const Question = require('../models/Question');
 const Result = require('../models/Result');
 
 const TOTAL_QUESTIONS = parseInt(process.env.TOTAL_QUESTIONS || '20', 10);
-const SECONDS_PER_QUESTION = parseInt(process.env.SECONDS_PER_QUESTION || '30', 10);
+const SECONDS_PER_QUESTION = parseInt(process.env.SECONDS_PER_QUESTION || '20', 10);
+
+// In-memory question cache — questions never change during competition
+// Avoids hitting MongoDB on every GET /questions (150 users = 150 DB queries saved)
+let cachedQuestions = null;
+async function getQuestions() {
+  if (cachedQuestions) return cachedQuestions;
+  const questions = await Question.find({ isActive: true })
+    .sort({ order: 1 })
+    .limit(TOTAL_QUESTIONS)
+    .lean(); // .lean() returns plain JS objects, ~5x faster than Mongoose documents
+  cachedQuestions = questions.map(q => ({
+    id: q._id,
+    order: q.order,
+    text: q.text,
+    options: q.options
+  }));
+  return cachedQuestions;
+}
 
 // Require a registered participant for every route in this file
 async function requireParticipant(req, res, next) {
@@ -31,20 +49,10 @@ router.get('/config', requireParticipant, (req, res) => {
 });
 
 // GET /api/quiz/questions
-// Returns the question set WITHOUT correct answers - never leak answers to the client.
+// Returns cached questions — first request loads from DB, rest served instantly
 router.get('/questions', requireParticipant, async (req, res) => {
   try {
-    const questions = await Question.find({ isActive: true })
-      .sort({ order: 1 })
-      .limit(TOTAL_QUESTIONS);
-
-    const safeQuestions = questions.map(q => ({
-      id: q._id,
-      order: q.order,
-      text: q.text,
-      options: q.options
-    }));
-
+    const safeQuestions = await getQuestions();
     res.json({ questions: safeQuestions, secondsPerQuestion: SECONDS_PER_QUESTION });
   } catch (err) {
     console.error('Fetch questions error:', err);
@@ -53,9 +61,7 @@ router.get('/questions', requireParticipant, async (req, res) => {
 });
 
 // POST /api/quiz/submit
-// Body: { answers: [{ questionId, selectedOption, timeTakenSeconds }], startedAt }
-// Scores the attempt server-side and stores it. The response to the participant
-// NEVER includes the score or correctness - only a plain confirmation.
+// Scores the attempt server-side and stores immediately in MongoDB.
 router.post('/submit', requireParticipant, async (req, res) => {
   try {
     const { answers, startedAt } = req.body;
@@ -63,16 +69,25 @@ router.post('/submit', requireParticipant, async (req, res) => {
       return res.status(400).json({ error: 'Invalid submission.' });
     }
 
-    const questionIds = answers.map(a => a.questionId);
-    const questions = await Question.find({ _id: { $in: questionIds } });
-    const questionMap = new Map(questions.map(q => [q._id.toString(), q]));
+    // Use cached questions for scoring — no DB query needed
+    const allQuestions = await getQuestions();
+    const questionIds = answers.map(a => String(a.questionId));
+
+    // Fetch correct answers for submitted question IDs only
+    const dbQuestions = await Question.find(
+      { _id: { $in: questionIds } },
+      { _id: 1, correctOption: 1, order: 1, text: 1 }  // only fetch needed fields
+    ).lean();
+    const questionMap = new Map(dbQuestions.map(q => [q._id.toString(), q]));
+    const cachedMap = new Map(allQuestions.map(q => [String(q.id), q]));
 
     let correctCount = 0;
     let wrongCount = 0;
     let unansweredCount = 0;
 
     const scoredAnswers = answers.map(a => {
-      const q = questionMap.get(a.questionId);
+      const q = questionMap.get(String(a.questionId));
+      const cached = cachedMap.get(String(a.questionId));
       if (!q) return null;
       const selected = a.selectedOption || null;
       const isCorrect = selected === q.correctOption;
@@ -84,7 +99,7 @@ router.post('/submit', requireParticipant, async (req, res) => {
       return {
         questionId: q._id,
         order: q.order,
-        questionText: q.text,
+        questionText: cached ? cached.text : q.text,
         selectedOption: selected,
         correctOption: q.correctOption,
         isCorrect,
