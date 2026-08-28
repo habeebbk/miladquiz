@@ -50,8 +50,11 @@ if (resultsBody) {
   const adminUserTag = document.getElementById('adminUserTag');
   const logoutBtn = document.getElementById('logoutBtn');
   const backLink = document.getElementById('backLink');
+  const filterScore = document.getElementById('filterScore');
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
 
   let resultsCache = [];
+  let filterVal = 'recent';
 
   async function checkSession() {
     const res = await fetch('/api/admin/me');
@@ -75,22 +78,57 @@ if (resultsBody) {
     renderList();
   }
 
+  function getDurationText(r) {
+    if (r.startedAt && r.submittedAt) {
+      const diff = Math.round((new Date(r.submittedAt) - new Date(r.startedAt)) / 1000);
+      return ` (${diff}s)`;
+    }
+    return '';
+  }
+
   function renderList() {
     resultsBody.innerHTML = '';
     if (!resultsCache.length) {
       emptyMsg.style.display = 'block';
       return;
     }
+
+    let processed = [...resultsCache];
+
+    if (filterVal === 'top-score') {
+      processed.sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        const durA = a.startedAt && a.submittedAt ? (new Date(a.submittedAt) - new Date(a.startedAt)) : Infinity;
+        const durB = b.startedAt && b.submittedAt ? (new Date(b.submittedAt) - new Date(b.startedAt)) : Infinity;
+        return durA - durB;
+      });
+    } else if (filterVal === 'perfect') {
+      processed = processed.filter(r => r.score === r.totalQuestions);
+      processed.sort((a, b) => {
+        const durA = a.startedAt && a.submittedAt ? (new Date(a.submittedAt) - new Date(a.startedAt)) : Infinity;
+        const durB = b.startedAt && b.submittedAt ? (new Date(b.submittedAt) - new Date(b.startedAt)) : Infinity;
+        return durA - durB;
+      });
+    } else {
+      processed.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    }
+
+    if (!processed.length) {
+      emptyMsg.style.display = 'block';
+      return;
+    }
     emptyMsg.style.display = 'none';
 
-    resultsCache.forEach(r => {
+    processed.forEach(r => {
       const p = r.participantSnapshot || {};
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${escapeHtml(p.name || '—')}</td>
         <td>${escapeHtml(p.phone || '—')}</td>
         <td>${escapeHtml(p.place || p.city || '—')}</td>
-        <td><span class="score-tag">${r.score} / ${r.totalQuestions}</span></td>
+        <td><span class="score-tag">${r.score} / ${r.totalQuestions}</span>${getDurationText(r)}</td>
         <td>${new Date(r.submittedAt).toLocaleString()}</td>
       `;
       tr.addEventListener('click', () => showDetail(r._id));
@@ -132,6 +170,64 @@ if (resultsBody) {
     listView.style.display = 'none';
     detailView.style.display = 'block';
   }
+
+  filterScore.addEventListener('change', (e) => {
+    filterVal = e.target.value;
+    renderList();
+  });
+
+  exportCsvBtn.addEventListener('click', () => {
+    if (!resultsCache || !resultsCache.length) {
+      alert('No results available to export.');
+      return;
+    }
+
+    const headers = ['Name', 'Phone', 'Place', 'Score', 'Total Questions', 'Correct', 'Wrong', 'Unanswered', 'Time Taken (s)', 'Submitted At'];
+    const rows = [headers.join(',')];
+
+    resultsCache.forEach(r => {
+      const p = r.participantSnapshot || {};
+      const name = (p.name || '').replace(/"/g, '""');
+      const phone = (p.phone || '').replace(/"/g, '""');
+      const place = (p.place || p.city || '').replace(/"/g, '""');
+
+      const score = r.score;
+      const total = r.totalQuestions;
+      const correct = r.correctCount || 0;
+      const wrong = r.wrongCount || 0;
+      const unanswered = r.unansweredCount || 0;
+
+      let duration = '';
+      if (r.startedAt && r.submittedAt) {
+        duration = Math.round((new Date(r.submittedAt) - new Date(r.startedAt)) / 1000);
+      }
+
+      const submittedAt = new Date(r.submittedAt).toLocaleString();
+
+      rows.push([
+        `"${name}"`,
+        `"${phone}"`,
+        `"${place}"`,
+        score,
+        total,
+        correct,
+        wrong,
+        unanswered,
+        duration,
+        `"${submittedAt}"`
+      ].join(','));
+    });
+
+    const csvContent = '\uFEFF' + rows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `OMR_Quiz_Results_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
 
   backLink.addEventListener('click', () => {
     detailView.style.display = 'none';

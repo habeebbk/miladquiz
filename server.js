@@ -35,7 +35,7 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// MongoDB connection with poolSize=100 for 150 concurrent users
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
   maxPoolSize: 100,        // Handle 150 concurrent DB operations
   minPoolSize: 10,         // Keep 10 connections warm
@@ -44,14 +44,19 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
   .then(() => {
     console.log('Connected to MongoDB (pool: 100)');
-    const server = app.listen(PORT, () =>
-      console.log(`Server running on http://localhost:${PORT}`)
-    );
-    // Increase keep-alive timeout for 150 concurrent HTTP connections
-    server.keepAliveTimeout = 65000;
-    server.headersTimeout = 70000;
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
-    process.exit(1);
   });
+
+// Only listen locally (Vercel will handle serverless execution)
+if (!process.env.VERCEL) {
+  const server = app.listen(PORT, () =>
+    console.log(`Server running on http://localhost:${PORT}`)
+  );
+  // Increase keep-alive timeout for concurrent HTTP connections
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 70000;
+}
+
+module.exports = app;

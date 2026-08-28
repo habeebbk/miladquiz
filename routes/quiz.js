@@ -48,12 +48,24 @@ router.get('/config', requireParticipant, (req, res) => {
   res.json({ totalQuestions: TOTAL_QUESTIONS, secondsPerQuestion: SECONDS_PER_QUESTION });
 });
 
+// Fisher-Yates shuffle — returns a new shuffled array, original untouched
+function shuffleArray(arr) {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 // GET /api/quiz/questions
-// Returns cached questions — first request loads from DB, rest served instantly
+// Returns cached questions shuffled uniquely per user
 router.get('/questions', requireParticipant, async (req, res) => {
   try {
     const safeQuestions = await getQuestions();
-    res.json({ questions: safeQuestions, secondsPerQuestion: SECONDS_PER_QUESTION });
+    // Each user gets a randomly shuffled order — cache stays intact for scoring
+    const shuffled = shuffleArray(safeQuestions);
+    res.json({ questions: shuffled, secondsPerQuestion: SECONDS_PER_QUESTION });
   } catch (err) {
     console.error('Fetch questions error:', err);
     res.status(500).json({ error: 'Could not load questions.' });

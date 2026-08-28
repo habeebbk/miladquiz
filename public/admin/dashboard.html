@@ -18,6 +18,19 @@
 
   <div id="errorBox" class="error-box"></div>
 
+  <!-- Controls (Filter, Sort, Export) -->
+  <div class="control-bar" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--paper-line); padding-bottom: 1rem;">
+    <div>
+      <label for="filterScore" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--utility-olive); margin-right:0.5rem; text-transform: uppercase; font-weight: 600;">Filter & Sort:</label>
+      <select id="filterScore" style="padding: 0.5rem 0.8rem; font-family:var(--font-mono); font-size:0.85rem; border:1px solid var(--paper-line); background: #fbf9f2; border-radius:3px; outline: none; cursor: pointer; color: var(--ink);">
+        <option value="recent">Recent Submissions</option>
+        <option value="top-score">Top Marks (Highest Score / Fastest Time)</option>
+        <option value="perfect">Perfect Scores Only</option>
+      </select>
+    </div>
+    <button class="btn" id="exportCsvBtn" style="padding:0.5rem 1.25rem; font-size:0.8rem; background: var(--pencil-blue);">Export CSV</button>
+  </div>
+
   <!-- List view -->
   <div id="listView">
     <table class="register" id="resultsTable">
