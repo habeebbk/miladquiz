@@ -1,71 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard — Quiz Competition</title>
-<link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Quiz Competition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .dashboard-container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+      width: 100%;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(0, 176, 116, 0.12);
+      color: #00B074;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .stat-info h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+    .stat-info p {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+    }
+    .table-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+    th {
+      color: #64748b;
+      font-weight: 600;
+    }
+    .badge-score {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+      background: rgba(0, 176, 116, 0.12);
+      color: #008f5d;
+    }
+  </style>
 </head>
-<body class="admin-body">
-<div class="admin-wrap">
-  <div class="admin-bar">
-    <h1>Results Register</h1>
-    <div>
-      <span class="tag" style="font-family:var(--font-mono); font-size:0.8rem; color:var(--utility-olive); margin-right:1rem;" id="adminUserTag"></span>
-      <button class="btn" id="logoutBtn" style="padding:0.5rem 1rem;">Log Out</button>
+
+<body class="registration-page" style="display:block;">
+
+  <nav class="navbar">
+    <a href="/" class="nav-brand">
+      <img src="/images/12.png" alt="Logo" class="nav-logo" onerror="this.src='/images/LOGO.png'">
+    </a>
+    <div class="nav-actions">
+      <button type="button" id="logoutBtn" class="btn-nav" style="background:#ef4444; border:none; cursor:pointer;">Logout</button>
     </div>
-  </div>
+  </nav>
 
-  <div id="errorBox" class="error-box"></div>
-
-  <!-- Controls (Filter, Sort, Export) -->
-  <div class="control-bar" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--paper-line); padding-bottom: 1rem;">
-    <div>
-      <label for="filterScore" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--utility-olive); margin-right:0.5rem; text-transform: uppercase; font-weight: 600;">Filter & Sort:</label>
-      <select id="filterScore" style="padding: 0.5rem 0.8rem; font-family:var(--font-mono); font-size:0.85rem; border:1px solid var(--paper-line); background: #fbf9f2; border-radius:3px; outline: none; cursor: pointer; color: var(--ink);">
-        <option value="recent">Recent Submissions</option>
-        <option value="top-score">Top Marks (Highest Score / Fastest Time)</option>
-        <option value="perfect">Perfect Scores Only</option>
-      </select>
-    </div>
-    <button class="btn" id="exportCsvBtn" style="padding:0.5rem 1.25rem; font-size:0.8rem; background: var(--pencil-blue);">Export CSV</button>
-  </div>
-
-  <!-- List view -->
-  <div id="listView">
-    <table class="register" id="resultsTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Place</th>
-          <th>Score</th>
-          <th>Submitted</th>
-        </tr>
-      </thead>
-      <tbody id="resultsBody"></tbody>
-    </table>
-    <p id="emptyMsg" style="display:none; font-family:var(--font-mono); color:var(--utility-olive);">
-      No submissions yet.
-    </p>
-  </div>
-
-  <!-- Detail view -->
-  <div id="detailView" style="display:none;">
-    <a class="link-back" id="backLink">&larr; Back to results</a>
-    <div class="sheet" style="margin-top:1rem;">
-      <div class="sheet-body">
-        <h2 id="detailName" style="font-family:var(--font-stamp); margin-top:0;"></h2>
-        <p id="detailMeta" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--utility-olive);"></p>
-        <p>
-          Score: <span class="score-tag" id="detailScore"></span>
-        </p>
-        <div id="detailAnswers"></div>
+  <div class="dashboard-container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="ri-user-follow-line"></i></div>
+        <div class="stat-info">
+          <h3 id="totalParticipants">0</h3>
+          <p>Total Participants</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="ri-trophy-line"></i></div>
+        <div class="stat-info">
+          <h3 id="topScore">0</h3>
+          <p>Top Score</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="ri-calculator-line"></i></div>
+        <div class="stat-info">
+          <h3 id="avgScore">0</h3>
+          <p>Average Score</p>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script src="/js/admin.js"></script>
+    <div class="table-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+        <h3 style="margin:0; color:#1e293b;">Recent Submissions</h3>
+        <button id="refreshBtn" style="background:#f1f5f9; border:1px solid #e2e8f0; color:#475569; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;"><i class="ri-refresh-line"></i> Refresh</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Place</th>
+            <th>Score</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="submissionsTable">
+          <tr>
+            <td colspan="6" style="text-align:center; color:#94a3b8; padding:30px;">Loading submissions...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/admin/results');
+        if (res.status === 401) {
+          window.location.href = '/admin/login.html';
+          return;
+        }
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch results');
+
+        const results = data.results || [];
+        document.getElementById('totalParticipants').textContent = results.length;
+
+        if (results.length > 0) {
+          const maxScore = Math.max(...results.map(r => r.score || 0));
+          const totalScoreSum = results.reduce((acc, r) => acc + (r.score || 0), 0);
+          const avg = (totalScoreSum / results.length).toFixed(1);
+
+          document.getElementById('topScore').textContent = maxScore;
+          document.getElementById('avgScore').textContent = avg;
+
+          const tbody = document.getElementById('submissionsTable');
+          tbody.innerHTML = '';
+
+          results.forEach((r, idx) => {
+            const tr = document.createElement('tr');
+            const p = r.participantSnapshot || {};
+            const timeStr = r.submittedAt ? new Date(r.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-';
+            const totalQ = r.totalQuestions || 20;
+
+            tr.innerHTML = `
+              <td>${idx + 1}</td>
+              <td style="font-weight:600; color:#1e293b;">${escapeHtml(p.name || '-')}</td>
+              <td>${escapeHtml(p.phone || '-')}</td>
+              <td>${escapeHtml(p.place || '-')}</td>
+              <td><span class="badge-score">${r.score} / ${totalQ}</span></td>
+              <td style="color:#64748b;">${timeStr}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          document.getElementById('topScore').textContent = '0';
+          document.getElementById('avgScore').textContent = '0';
+          document.getElementById('submissionsTable').innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center; color:#94a3b8; padding:30px;">No submissions recorded yet</td>
+            </tr>
+          `;
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('submissionsTable').innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; color:#ef4444; padding:30px;">Failed to load data. Please refresh.</td>
+          </tr>
+        `;
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await fetch('/api/admin/logout', { method: 'POST' });
+      } catch (err) {
+        console.error(err);
+      }
+      window.location.href = '/admin/login.html';
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', loadDashboard);
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    loadDashboard();
+  </script>
 </body>
+
 </html>

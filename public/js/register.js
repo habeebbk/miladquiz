@@ -1,65 +1,81 @@
-const form = document.getElementById('registerForm');
-const errorBox = document.getElementById('errorBox');
-const startBtn = document.getElementById('startBtn');
+document.addEventListener('DOMContentLoaded', () => {
+  const registerForm = document.getElementById('registerForm');
+  const errorBox = document.getElementById('errorBox');
+  const startBtn = document.getElementById('startBtn');
 
-function showError(msg) {
-  errorBox.textContent = msg;
-  errorBox.classList.add('show');
-}
+  if (!registerForm) return;
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  errorBox.classList.remove('show');
-  startBtn.disabled = true;
-  startBtn.textContent = 'Please wait...';
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
 
-  const name = document.getElementById('name').value.trim();
-  const phone = document.getElementById('phone').value.trim().replace(/\D/g, '');
-  const place = document.getElementById('place').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const place = document.getElementById('place').value.trim();
 
-  if (!name) {
-    showError('Please enter your full name.');
-    startBtn.disabled = false;
-    startBtn.textContent = 'Start Test';
-    return;
-  }
-
-  if (!phone || phone.length !== 10) {
-    showError('Please enter a valid 10-digit phone number.');
-    startBtn.disabled = false;
-    startBtn.textContent = 'Start Test';
-    return;
-  }
-
-  if (!place) {
-    showError('Please enter your place.');
-    startBtn.disabled = false;
-    startBtn.textContent = 'Start Test';
-    return;
-  }
-
-  const payload = { name, phone, place };
-
-  try {
-    const res = await fetch('/api/participant/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      showError(data.error || 'Something went wrong. Please try again.');
-      startBtn.disabled = false;
-      startBtn.textContent = 'Start Test';
+    if (!name || !phone || !place) {
+      showError('Please fill in all required fields.');
       return;
     }
 
-    sessionStorage.removeItem('omr_quiz_progress');
-    window.location.href = '/quiz.html';
-  } catch (err) {
-    showError('Network error. Please check your connection and try again.');
-    startBtn.disabled = false;
-    startBtn.textContent = 'Start Test';
+    if (!/^[0-9]{10}$/.test(phone)) {
+      showError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.textContent = 'Starting Quiz...';
+    }
+
+    try {
+      const response = await fetch('/api/participant/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, phone, place })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed. Please try again.');
+      }
+
+      // Clear any previous quiz state and store new participant details
+      sessionStorage.removeItem('omr_quiz_session');
+      sessionStorage.setItem('quiz_user', JSON.stringify({
+        name,
+        phone,
+        place,
+        participantId: data.participantId
+      }));
+
+      // Redirect to quiz page
+      window.location.href = '/quiz.html';
+    } catch (err) {
+      showError(err.message);
+      if (startBtn) {
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start Quiz';
+      }
+    }
+  });
+
+  function showError(msg) {
+    if (errorBox) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    } else {
+      alert(msg);
+    }
+  }
+
+  function hideError() {
+    if (errorBox) {
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    }
   }
 });

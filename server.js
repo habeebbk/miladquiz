@@ -10,7 +10,7 @@ const quizRoutes = require('./routes/quiz');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Gzip compress all responses — reduces bandwidth by ~70%
 app.use(compression());
@@ -54,6 +54,15 @@ if (!process.env.VERCEL) {
   const server = app.listen(PORT, () =>
     console.log(`Server running on http://localhost:${PORT}`)
   );
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n❌ Port ${PORT} is already in use by another running server/terminal.`);
+      console.error(`👉 Please close any existing terminal running "npm start" or "node server.js", or change PORT in .env\n`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
   // Increase keep-alive timeout for concurrent HTTP connections
   server.keepAliveTimeout = 65000;
   server.headersTimeout = 70000;

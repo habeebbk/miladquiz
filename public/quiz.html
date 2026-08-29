@@ -1,56 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Competition — Test in progress</title>
-<link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz in Progress — Competition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=1.2">
 </head>
-<body>
-<div class="wrap">
-  <div class="masthead">
-    <h1>Quiz Competition</h1>
-    <span class="tag">Answer sheet in progress</span>
-  </div>
 
-  <div id="errorBox" class="error-box"></div>
+<body class="registration-page">
 
-  <div id="loadingMsg" style="font-family: var(--font-mono); color: var(--utility-olive);">
-    Loading questions...
-  </div>
-
-  <div class="sheet" id="quizSheet" style="display:none;">
-    <div class="sheet-body">
-
-      <div class="quiz-top">
-        <span class="q-counter" id="qCounter">Question 1 of 20</span>
-        <div class="timer-ring" id="timerRing">
-          <svg viewBox="0 0 56 56">
-            <circle class="track" cx="28" cy="28" r="24"></circle>
-            <circle class="progress" id="timerCircle" cx="28" cy="28" r="24"></circle>
-          </svg>
-          <div class="num" id="timerNum">30</div>
-        </div>
-      </div>
-
-      <div class="progress-row" id="progressRow"></div>
-
-      <div class="question-block" id="questionBlock">
-        <div class="stamp-flash" id="stampFlash">TIME UP</div>
-        <div class="q-number" id="qNumber">Question 01</div>
-        <p class="q-text" id="qText">Loading...</p>
-        <div class="options" id="optionsList"></div>
-      </div>
-
-      <div class="quiz-footer">
-        <button class="btn btn-secondary" id="prevBtn" type="button" style="visibility:hidden;">← Previous</button>
-        <button class="btn" id="nextBtn" type="button">Next →</button>
-      </div>
-
+  <nav class="navbar">
+    <a href="/" class="nav-brand">
+      <img src="/images/12.png" alt="Logo" class="nav-logo" onerror="this.src='/images/LOGO.png'">
+    </a>
+    <div class="nav-actions">
+      <span id="timerContainer" style="color:#00B074; font-weight:700; font-size:14px;"><i class="ri-timer-line"></i>
+        <span id="timerDisplay">20s</span></span>
     </div>
-  </div>
-</div>
+  </nav>
 
-<script src="/js/quiz.js"></script>
+  <main class="main-container">
+    <div class="card" style="max-width: 600px;">
+      <div class="card-header"
+        style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px;">
+        <h2 style="font-size:20px; margin:0;">Question <span id="questionNum">1</span></h2>
+        <span style="font-size:14px; font-weight:600; color:#00B074;" id="scoreTracker">Quiz Live</span>
+      </div>
+
+      <div id="errorBox" class="error-box" style="margin-top: 15px;"></div>
+
+      <div id="quizContainer" style="margin-top:20px; text-align:left;">
+        <p id="questionText"
+          style="font-size:17px; font-weight:600; color:#1e293b; line-height:1.5; margin-bottom:20px;">Loading
+          question...</p>
+
+        <div id="optionsContainer" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Options dynamically rendered here -->
+        </div>
+
+        <button type="button" id="nextBtn" class="btn-submit" style="margin-top:24px;">Next Question</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer with Logo -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <img src="/images/LOGO.png" alt="SSF Logo" class="footer-logo" onerror="this.src='/images/12.png'">
+      <span class="unit-name">SSF Puthupparamba Kaaratangadi Unit</span>
+    </div>
+    <p class="footer-rights">© 2026 All rights reserved.</p>
+  </footer>
+
+  <script src="/js/quiz.js?v=1.7"></script>
 </body>
+
 </html>
